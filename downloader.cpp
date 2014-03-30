@@ -7,38 +7,34 @@ Downloader::Downloader(QString strUrl, QObject *parent) :
     manager = new QNetworkAccessManager();
     fileName = QFileInfo(strUrl).fileName();
     reply = manager->get(QNetworkRequest(url));
-    target = new QFile(QDir::homePath()+"/"+fileName);
 
     qDebug() << QDir::homePath()+"/"+fileName << " downloading.";
-    connect(reply, SIGNAL(readyRead()), this, SLOT(isAvailable()));
-    //connect(reply, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(downloadProgress()));
-    connect(reply, SIGNAL(finished()), this, SLOT(downliading()));
-
+    connect(reply, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(downloadProgress(qint64,qint64)));
+    connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(downliading()));
 }
 
 Downloader::~Downloader(){
     reply->deleteLater();
-    target->close();
     manager->deleteLater();
 }
 
 void Downloader::downliading(){
-    if ( !target->open(QIODevice::WriteOnly) ) {
-        qDebug() << fileName << " unavailable.";
-    } else {
-        QByteArray content = reply->readAll();
+    int code = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    QByteArray content = reply->readAll();
+
+    if ( code >= 200 && code <= 300 ) {
+        QFile* target = new QFile(QDir::homePath()+"/"+fileName);
+
+        target->open(QIODevice::WriteOnly);
         target->write(content);
+        target->close();
         qDebug() << fileName << " successfully downloaded.";
+    } else {
+        qDebug() << fileName << " unavailable! Error: " << code;
     }
 }
 
-void Downloader::isAvailable() {
-    qDebug() << " download.";
-    if ( reply->error() ) {
-        qDebug() << fileName << " download faild.";
-    }
-}
 
-//void Downloader::downloadProgress(){
-//    qDebug() <<
-//}
+void Downloader::downloadProgress(qint64 recieved, qint64 total){
+    qDebug() << "Recived " << (recieved/total)*100 << "%";
+}

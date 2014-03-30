@@ -9,6 +9,7 @@
 #include <QFile>
 #include <QDir>
 #include <QFileInfo>
+#include <QStringList>
 #include <QDebug>
 
 class Downloader : public QObject
@@ -19,7 +20,6 @@ private:
     QString fileName;
     QNetworkAccessManager* manager;
     QNetworkReply* reply;
-    QFile* target;
 
 public:
     Downloader(QString strUrl, QObject *parent = 0);
@@ -27,8 +27,7 @@ public:
     
 public slots:
     void downliading();
-    void isAvailable();
-    //void downloadProgress();
+    void downloadProgress(qint64 recieved, qint64 total);
 
 };
 
