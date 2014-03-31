@@ -10,6 +10,8 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QStringList>
+#include <QCoreApplication>
+#include <iostream>
 #include <QDebug>
 
 class Downloader : public QObject

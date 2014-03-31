@@ -32,9 +32,13 @@ void Downloader::downliading(){
     } else {
         qDebug() << fileName << " unavailable! Error: " << code;
     }
+    QCoreApplication::instance()->quit();
 }
 
-
 void Downloader::downloadProgress(qint64 recieved, qint64 total){
-    qDebug() << "Recived " << (recieved/total)*100 << "%";
+    if ( recieved == total ) {
+        std::cout << "\r Recived " << int(double(recieved)/total*100) << " %\n";
+    } else {
+        std::cout << "\r Recived " << int(double(recieved)/total*100) << " %";
+    }
 }
